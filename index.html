@@ -602,8 +602,11 @@
         }
 
         function findClassesInSlot(day, slot) {
-            return scheduleData.filter(classInfo => {
+             return scheduleData.filter(classInfo => {
                 if (classInfo.day !== day) return false;
+                
+                // Kiểm tra xem có phải trong khoảng thời gian học không
+                if (!isClassActiveInCurrentWeek(classInfo)) return false;
                 
                 const startPeriod = classInfo.period;
                 const endPeriod = startPeriod + classInfo.duration - 1;
@@ -613,7 +616,30 @@
                 return (startPeriod <= slotEnd && endPeriod >= slotStart);
             });
         }
-
+        function isClassActiveInCurrentWeek(classInfo) {
+            const currentDate = new Date();
+            currentDate.setDate(currentDate.getDate() + (currentWeekOffset * 7));
+            
+            const dateRange = classInfo.dates.split('-');
+            const startDate = parseVietnameseDate(dateRange[0]);
+            const endDate = parseVietnameseDate(dateRange[1]);
+            
+            // Kiểm tra xem tuần hiện tại có nằm trong khoảng thời gian học không
+            const weekStart = new Date(currentDate);
+            weekStart.setDate(currentDate.getDate() - currentDate.getDay() + 1);
+            
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            
+            return (weekStart <= endDate && weekEnd >= startDate);
+        }
+        function parseVietnameseDate(dateStr) {
+            const parts = dateStr.trim().split('/');
+            const day = parseInt(parts[0]);
+            const month = parseInt(parts[1]) - 1; // Month is 0-indexed
+            const year = parseInt('20' + parts[2]); // Assuming 25 means 2025
+            return new Date(year, month, day);
+        }
         function showClassDetail(classInfo) {
             const modal = document.getElementById('class-modal');
             const title = document.getElementById('modal-title');
