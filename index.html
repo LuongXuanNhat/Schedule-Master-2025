@@ -195,10 +195,15 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.2);
             backdrop-filter: blur(5px);
         }
 
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
         .modal-content {
             background-color: white;
             margin: 5% auto;
@@ -364,6 +369,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -439,650 +445,805 @@
     <!-- Modal chi tiết môn học -->
     <div id="class-modal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="modal-title">Chi tiết môn học</h2>
+            <div class="modal-header">
+                <h3 id="modal-title" >Chi tiết môn học</h3>
+                <span class="close">&times;</span>
+            </div>
             <div id="modal-body"></div>
         </div>
     </div>
 
     <!-- Notification -->
     <div id="notification" class="notification"></div>
+</body>
 
-    <script>
-        // Dữ liệu thời khóa biểu từ hình ảnh
-        const scheduleData = [
-            {
-                code: 'GCOS134',
-                name: 'Các hệ cơ sở dữ liệu',
-                teacher: 'PGS.TS. Nguyễn Thị Thúy Loan',
-                day: 7, // Chủ nhật
-                period: 8,
-                duration: 5,
-                room: 'A-06.15',
-                class: '25SCT11',
-                dates: '21/06/25-16/08/25'
-            },
-            {
-                code: 'GCOS108',
-                name: 'Khám phá tri thức và khai thác dữ liệu',
-                teacher: 'PGS.TS. Võ Đình Bày',
-                day: 7,
-                period: 13,
-                duration: 3,
-                room: 'A-06.15',
-                class: '25SCT11',
-                dates: '21/06/25-23/08/25'
-            },
-            {
-                code: 'GCOS108',
-                name: 'Khám phá tri thức và khai thác dữ liệu',
-                teacher: 'PGS.TS. Võ Đình Bày',
-                day: 8, // Thứ 2
-                period: 2,
-                duration: 5,
-                room: 'A-06.15',
-                class: '25SCT11',
-                dates: '17/08/25-31/08/25'
-            },
-            {
-                code: 'GCOS107',
-                name: 'Khai thác thông tin',
-                teacher: 'TS. Phạm Thế Anh Phú',
-                day: 8,
-                period: 1,
-                duration: 6,
-                room: 'B-13.09',
-                class: '25SCT11',
-                dates: '22/06/25-03/08/25'
-            },
-            {
-                code: 'GCOS107',
-                name: 'Khai thác thông tin',
-                teacher: 'TS. Phạm Thế Anh Phú',
-                day: 8,
-                period: 1,
-                duration: 3,
-                room: 'B-13.09',
-                class: '25SCT11',
-                dates: '10/08/25-10/08/2025'
-            },
-            {
-                code: 'GCOS120',
-                name: 'Tối ưu hóa và quy hoạch tuyến tính',
-                teacher: 'TS. Hồ Đắc Nghĩa',
-                day: 8,
-                period: 8,
-                duration: 5,
-                room: 'B-12.03',
-                class: '25SCT11',
-                dates: '22/06/25-17/08/25'
-            },
-            {
-                code: 'GCOS114',
-                name: 'Xử lý ngôn ngữ tự nhiên',
-                teacher: 'TS. Lê Thị Ngọc Thơ',
-                day: 2, // Thứ 3
-                period: 13,
-                duration: 3,
-                room: 'B-13.04',
-                class: '25SCT11',
-                dates: '23/06/25-11/08/25'
-            },
-            {
-                code: 'GCOS114',
-                name: 'Xử lý ngôn ngữ tự nhiên',
-                teacher: 'TS. Lê Thị Ngọc Thơ',
-                day: 4, // Thứ 5
-                period: 13,
-                duration: 3,
-                room: 'B-13.04',
-                class: '25SCT11',
-                dates: '25/06/25-06/08/25'
-            }
-        ];
-
-        const timeSlots = [
-            'Ca 1 (6:45-9:00)',
-            'Ca 2 (9:20-11:35)', 
-            'Ca 3 (12:30-14:45)',
-            'Ca 4 (15:05-17:20)',
-            'Ca 5 (18:00-20:15)'
-        ];
-
-        let currentWeekOffset = 0;
-        let currentView = 'table';
-
-        function initSchedule() {
-            generateScheduleTable();
-            updateCurrentWeek();
-            highlightToday();
-            showNotification('Chào mừng! Thời khóa biểu đã được tải thành công.', 'success');
+<script>
+    // Day 1 là thứ 2 , tương tự như vậy cho đến day 8 là chủ nhật
+    const scheduleData = [
+        {
+            code: 'GCOS134',
+            name: 'Các hệ cơ sở dữ liệu',
+            teacher: 'PGS.TS. Nguyễn Thị Thúy Loan',
+            day: 7 , 
+            period: 8,
+            duration: 5,
+            room: 'A-06.15',
+            class: '25SCT11',
+            dates: '21/06/25-16/08/25'
+        },
+        {
+            code: 'GCOS108',
+            name: 'Khám phá tri thức và khai thác dữ liệu',
+            teacher: 'PGS.TS. Võ Đình Bày',
+            day: 7,
+            period: 13,
+            duration: 3,
+            room: 'A-06.15',
+            class: '25SCT11',
+            dates: '21/06/25-23/08/25'
+        },
+        {
+            code: 'GCOS108',
+            name: 'Khám phá tri thức và khai thác dữ liệu',
+            teacher: 'PGS.TS. Võ Đình Bày',
+            day: 8 ,  
+            period: 2,
+            duration: 5,
+            room: 'A-06.15',
+            class: '25SCT11',
+            dates: '17/08/25-31/08/25'
+        },
+        {
+            code: 'GCOS107',
+            name: 'Khai thác thông tin',
+            teacher: 'TS. Phạm Thế Anh Phú',
+            day: 8,
+            period: 1,
+            duration: 6,
+            room: 'B-13.09',
+            class: '25SCT11',
+            dates: '22/06/25-03/08/25'
+        },
+        {
+            code: 'GCOS107',
+            name: 'Khai thác thông tin',
+            teacher: 'TS. Phạm Thế Anh Phú',
+            day: 8,
+            period: 1,
+            duration: 3,
+            room: 'B-13.09',
+            class: '25SCT11',
+            dates: '10/08/25-10/08/2025'
+        },
+        {
+            code: 'GCOS120',
+            name: 'Tối ưu hóa và quy hoạch tuyến tính',
+            teacher: 'TS. Hồ Đắc Nghĩa',
+            day: 8,
+            period: 8,
+            duration: 5,
+            room: 'B-12.03',
+            class: '25SCT11',
+            dates: '22/06/25-17/08/25'
+        },
+        {
+            code: 'GCOS114',
+            name: 'Xử lý ngôn ngữ tự nhiên',
+            teacher: 'TS. Lê Thị Ngọc Thơ',
+            day: 2, 
+            period: 13,
+            duration: 3,
+            room: 'B-13.04',
+            class: '25SCT11',
+            dates: '23/06/25-11/08/25'
+        },
+        {
+            code: 'GCOS114',
+            name: 'Xử lý ngôn ngữ tự nhiên',
+            teacher: 'TS. Lê Thị Ngọc Thơ',
+            day: 4, 
+            period: 13,
+            duration: 3,
+            room: 'B-13.04',
+            class: '25SCT11',
+            dates: '25/06/25-06/08/25'
         }
+    ];
 
-       function generateScheduleTable() {
-            const tbody = document.getElementById('schedule-body');
-            tbody.innerHTML = '';
+    const timeSlots = [
+        'Ca 1 (6:45-9:00)',
+        'Ca 2 (9:20-11:35)', 
+        'Ca 3 (12:30-14:45)',
+        'Ca 4 (15:05-17:20)',
+        'Ca 5 (18:00-20:15)'
+    ];
 
-            for (let slot = 0; slot < 5; slot++) {
-                const row = document.createElement('tr');
+    let currentWeekOffset = 0;
+    let currentView = 'table';
+
+    function initSchedule() {
+        generateScheduleTable();
+        updateCurrentWeek();
+        highlightToday();
+        showNotification('Chào mừng! Thời khóa biểu đã được tải thành công.', 'success');
+    }
+
+    function generateScheduleTable() {
+        const tbody = document.getElementById('schedule-body');
+        tbody.innerHTML = '';
+
+        for (let slot = 0; slot < 5; slot++) {
+            const row = document.createElement('tr');
+            
+            // Cột thời gian
+            const timeCell = document.createElement('td');
+            timeCell.className = 'time-slot';
+            timeCell.textContent = timeSlots[slot];
+            row.appendChild(timeCell);
+
+            // Các cột từ thứ 2 đến chủ nhật
+            for (let day = 2; day <= 8; day++) {
+                const cell = document.createElement('td');
+                const classesInSlot = findClassesInSlot(day, slot);
                 
-                // Cột thời gian
-                const timeCell = document.createElement('td');
-                timeCell.className = 'time-slot';
-                timeCell.textContent = timeSlots[slot];
-                row.appendChild(timeCell);
-
-                // Các cột từ thứ 2 đến chủ nhật
-                for (let day = 2; day <= 8; day++) {
-                    const cell = document.createElement('td');
-                    const classesInSlot = findClassesInSlot(day, slot);
-                    
-                    if (classesInSlot.length > 0) {
-                        classesInSlot.forEach(classInfo => {
-                            const classDiv = document.createElement('div');
-                            classDiv.className = 'class-cell';
-                            classDiv.innerHTML = `
-                                <span class="class-code">${classInfo.code}</span>
-                                <span class="class-name">${classInfo.name}</span>
-                                <span class="class-room">📍 ${classInfo.room}</span>
-                            `;
-                            classDiv.onclick = () => showClassDetail(classInfo);
-                            cell.appendChild(classDiv);
-                        });
-                    } else {
-                        cell.className = 'empty-cell';
-                        cell.textContent = 'Trống';
-                    }
-                    
-                    row.appendChild(cell);
+                if (classesInSlot.length > 0) {
+                    classesInSlot.forEach(classInfo => {
+                        const classDiv = document.createElement('div');
+                        classDiv.className = 'class-cell';
+                        classDiv.innerHTML = `
+                            <span class="class-code">${classInfo.code}</span>
+                            <span class="class-name">${classInfo.name}</span>
+                            <span class="class-room">📍 ${classInfo.room}</span>
+                        `;
+                        classDiv.onclick = () => showClassDetail(classInfo);
+                        cell.appendChild(classDiv);
+                    });
+                } else {
+                    cell.className = 'empty-cell';
+                    cell.textContent = 'Trống';
                 }
                 
-                tbody.appendChild(row);
+                row.appendChild(cell);
+            }
+            
+            tbody.appendChild(row);
+        }
+    }
+
+    function findClassesInSlot(day, slot) {
+            return scheduleData.filter(classInfo => {
+            if (classInfo.day !== day) return false;
+            
+            // Kiểm tra xem có phải trong khoảng thời gian học không
+            if (!isClassActiveInCurrentWeek(classInfo)) return false;
+            
+            const startPeriod = classInfo.period;
+            const endPeriod = startPeriod + classInfo.duration - 1;
+            const slotStart = slot * 3 + 1;
+            const slotEnd = slotStart + 2;
+            
+            return (startPeriod <= slotEnd && endPeriod >= slotStart);
+        });
+    }
+    
+    function isClassActiveInCurrentWeek(classInfo) {
+        const currentDate = new Date();
+        currentDate.setDate(currentDate.getDate() + (currentWeekOffset * 7));
+        
+        // Tính toán tuần hiện tại (thứ 2 đến chủ nhật)
+        const weekStart = new Date(currentDate);
+        const dayOfWeek = currentDate.getDay();
+        const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Nếu chủ nhật thì -6, ngược lại 1 - dayOfWeek
+        weekStart.setDate(currentDate.getDate() + daysToMonday);
+        
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        
+        // Parse ngày bắt đầu và kết thúc của môn học
+        const dateRange = classInfo.dates.split('-');
+        const startDate = parseVietnameseDate(dateRange[0]);
+        const endDate = parseVietnameseDate(dateRange[1]);
+        
+        // Tính các ngày học cụ thể
+        const classDays = getClassDatesInRange(classInfo, startDate, endDate);
+        
+        // Kiểm tra xem tuần hiện tại có ngày học nào không
+        return classDays.some(classDate => {
+            return classDate >= weekStart && classDate <= weekEnd;
+        });
+    }
+
+    // 9. Thêm hàm để tính các ngày học cụ thể
+    function getClassDatesInRange(classInfo, startDate, endDate) {
+        const classDates = [];
+        const dayOfWeek = classInfo.day === 8 ? 0 : classInfo.day - 1; // Convert to JS day format (0=Sunday)
+        
+        // Tìm ngày đầu tiên có thể học (từ startDate)
+        let currentDate = new Date(startDate);
+        
+        // Tìm ngày đầu tiên trong tuần phù hợp
+        while (currentDate.getDay() !== dayOfWeek) {
+            currentDate.setDate(currentDate.getDate() + 1);
+            if (currentDate > endDate) break;
+        }
+        
+        // Thêm tất cả các ngày học theo tuần
+        while (currentDate <= endDate) {
+            classDates.push(new Date(currentDate));
+            currentDate.setDate(currentDate.getDate() + 7); // Thêm 7 ngày cho tuần tiếp theo
+        }
+        
+        return classDates;
+    }
+
+    function parseVietnameseDate(dateStr) {
+        const parts = dateStr.trim().split('/');
+        const day = parseInt(parts[0]);
+        const month = parseInt(parts[1]) - 1; // Month is 0-indexed
+        let year = parseInt(parts[2]);
+        
+        // Xử lý năm 2 chữ số
+        if (year < 100) {
+            year += year < 50 ? 2000 : 1900; // 25 -> 2025, 99 -> 1999
+        }
+        
+        return new Date(year, month, day);
+    }
+
+    function showClassDetail(classInfo) {
+        const modal = document.getElementById('class-modal');
+        const title = document.getElementById('modal-title');
+        const body = document.getElementById('modal-body');
+        
+        title.textContent = `${classInfo.code} - ${classInfo.name}`;
+        body.innerHTML = `
+    <div style="
+        background: #f9f9f9;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #333;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        max-width: 500px;
+        margin: 0 auto;
+        line-height: 1.8;
+    ">
+        <p><span>👨‍🏫 Giảng viên:</span> <strong style="display:inline-block; margin-left: 8px;">${classInfo.teacher}</strong></p>
+        <p><span>📅 Thời gian:</span> <strong style="display:inline-block; margin-left: 8px;">${getDayName(classInfo.day)}, Tiết ${classInfo.period}-${classInfo.period + classInfo.duration - 1}</strong></p>
+        <p><span>🏫 Phòng học:</span> <strong style="display:inline-block; margin-left: 8px;">${classInfo.room}</strong></p>
+        <p><span>👥 Lớp:</span> <strong style="display:inline-block; margin-left: 8px;">${classInfo.class}</strong></p>
+        <p><span>📆 Thời gian học:</span> <strong style="display:inline-block; margin-left: 8px;">${classInfo.dates}</strong></p>
+        <p><span>⏱️ Số tiết:</span> <strong style="display:inline-block; margin-left: 8px;">${classInfo.duration} tiết</strong></p>
+    </div>
+`;
+
+
+        
+        modal.style.display = 'block';
+    }
+
+    function getDayName(day) {
+        const days = ['', '', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
+        return days[day];
+    }
+
+    function showToday() {
+        currentWeekOffset = 0;
+        currentMonthOffset = 0;
+        
+        updateCurrentWeek();
+        updateCurrentMonth();
+        
+        if (currentView === 'table') {
+            generateScheduleTable();
+        } else {
+            generateCalendarView();
+        }
+        
+        const today = new Date().getDay();
+        const todayColumn = today === 0 ? 7 : today; 
+        
+        // Xóa highlight cũ
+        document.querySelectorAll('.today-highlight').forEach(el => {
+            el.classList.remove('today-highlight');
+        });
+        
+        if (currentView === 'table') {
+            // Highlight cột hôm nay trong table view
+            const table = document.getElementById('schedule-table');
+            if (table && table.rows) {
+                const rows = table.rows;
+                for (let i = 0; i < rows.length; i++) {
+                    if (rows[i].cells[todayColumn]) {
+                        rows[i].cells[todayColumn].classList.add('today-highlight');
+                    }
+                }
             }
         }
+        
+        showNotification(`Đã quay về lịch hiện tại (${getDayName(todayColumn + 1)})`, 'success');
+    }
 
-        function findClassesInSlot(day, slot) {
-             return scheduleData.filter(classInfo => {
-                if (classInfo.day !== day) return false;
-                
-                // Kiểm tra xem có phải trong khoảng thời gian học không
-                if (!isClassActiveInCurrentWeek(classInfo)) return false;
-                
-                const startPeriod = classInfo.period;
-                const endPeriod = startPeriod + classInfo.duration - 1;
-                const slotStart = slot * 3 + 1;
-                const slotEnd = slotStart + 2;
-                
-                return (startPeriod <= slotEnd && endPeriod >= slotStart);
-            });
+    let currentMonthOffset = 0;
+
+    function highlightToday() {
+        setTimeout(showToday, 500);
+    }
+
+    function searchClasses(searchTerm) {
+        const cells = document.querySelectorAll('.class-cell');
+        
+        cells.forEach(cell => {
+            const text = cell.textContent.toLowerCase();
+            if (text.includes(searchTerm.toLowerCase())) {
+                cell.style.opacity = '1';
+                cell.style.transform = 'scale(1)';
+            } else {
+                cell.style.opacity = searchTerm ? '0.3' : '1';
+                cell.style.transform = searchTerm ? 'scale(0.95)' : 'scale(1)';
+            }
+        });
+    }
+
+    function changeWeek(offset) {
+        currentWeekOffset += offset;
+        updateCurrentWeek();
+        
+        // Regenerate table view để hiển thị lịch của tuần mới
+        if (currentView === 'table') {
+            generateScheduleTable();
         }
-        function isClassActiveInCurrentWeek(classInfo) {
-            const currentDate = new Date();
-            currentDate.setDate(currentDate.getDate() + (currentWeekOffset * 7));
+        
+        showNotification(`Đã chuyển ${offset > 0 ? 'sang tuần sau' : 'về tuần trước'}`, 'info');
+    }
+
+    function updateCurrentWeek() {
+        const currentDate = new Date();
+        currentDate.setDate(currentDate.getDate() + (currentWeekOffset * 7));
+        
+        const weekStart = new Date(currentDate);
+        weekStart.setDate(currentDate.getDate() - currentDate.getDay() + 1);
+        
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        
+        document.getElementById('current-week').textContent = 
+            `${weekStart.getDate()}/${weekStart.getMonth() + 1} - ${weekEnd.getDate()}/${weekEnd.getMonth() + 1}`;
+    }
+
+    function showStats() {
+        const container = document.getElementById('stats-container');
+        container.style.display = container.style.display === 'none' ? 'grid' : 'none';
+        
+        if (container.style.display === 'grid') {
+            updateStats();
+            showNotification('Đã hiển thị thống kê chi tiết', 'success');
+        }
+    }
+
+    function updateStats() {
+        const uniqueClasses = [...new Set(scheduleData.map(c => c.code))];
+        const totalHours = scheduleData.reduce((sum, c) => sum + c.duration, 0) * 0.75; // 45 phút/tiết
+        
+        // Tìm ngày bận nhất
+        const dayCount = {};
+        scheduleData.forEach(c => {
+            dayCount[c.day] = (dayCount[c.day] || 0) + c.duration;
+        });
+        const busiestDay = Object.keys(dayCount).reduce((a, b) => dayCount[a] > dayCount[b] ? a : b);
+        
+        document.getElementById('total-classes').textContent = uniqueClasses.length;
+        document.getElementById('total-hours').textContent = Math.round(totalHours);
+        document.getElementById('busiest-day').textContent = getDayName(parseInt(busiestDay));
+        document.getElementById('next-class').textContent = getNextClass();
+    }
+
+    function getNextClass() {
+        const now = new Date();
+        const currentDay = now.getDay() === 0 ? 8 : now.getDay() + 1; // Convert to our format
+        const currentHour = now.getHours();
+        
+        // Tìm lớp tiếp theo trong ngày
+        const todayClasses = scheduleData.filter(c => c.day === currentDay);
+        for (let cls of todayClasses) {
+            const classHour = getClassStartHour(cls.period);
+            if (classHour > currentHour) {
+                return cls.code;
+            }
+        }
+        
+        // Nếu không có lớp nào trong ngày, tìm lớp đầu tiên của ngày mai
+        const tomorrow = currentDay === 8 ? 2 : currentDay + 1;
+        const tomorrowClasses = scheduleData.filter(c => c.day === tomorrow);
+        if (tomorrowClasses.length > 0) {
+            return tomorrowClasses[0].code;
+        }
+        
+        return 'Không có';
+    }
+
+    function getClassStartHour(period) {
+        const timeMap = {1: 6, 4: 9, 7: 12, 10: 15, 13: 18};
+        return timeMap[period] || 6;
+    }
+
+    function exportSchedule() {
+        let csvContent = "Mã môn,Tên môn,Giảng viên,Ngày,Tiết,Phòng,Lớp\n";
+        
+        scheduleData.forEach(cls => {
+            csvContent += `${cls.code},"${cls.name}","${cls.teacher}",${getDayName(cls.day)},${cls.period},${cls.room},${cls.class}\n`;
+        });
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'thoi_khoa_bieu.csv';
+        link.click();
+        
+        showNotification('Đã xuất thời khóa biểu thành công!', 'success');
+    }
+
+    function showNotifications() {
+        const notifications = [
+            'Nhắc nhở: Lớp GCOS134 sẽ bắt đầu lúc 18:00 hôm nay',
+            'Thông báo: Phòng học môn GCOS108 đã thay đổi',
+            'Lịch học tuần tới sẽ có một số điều chỉnh'
+        ];
+        
+        notifications.forEach((msg, index) => {
+            setTimeout(() => showNotification(msg, 'info'), index * 1000);
+        });
+    }
+
+    function switchView(view) {
+        currentView = view;
+        
+        // Update button states
+        document.querySelectorAll('.view-toggle button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        // Switch views
+        if (view === 'table') {
+            document.getElementById('table-view').style.display = 'block';
+            document.getElementById('calendar-view').style.display = 'none';
+            updateWeekNavigation();
+        } else {
+            document.getElementById('table-view').style.display = 'none';
+            document.getElementById('calendar-view').style.display = 'block';
+            updateMonthNavigation();
+            generateCalendarView();
+        }
+    }
+
+    function updateWeekNavigation() {
+        const navigation = document.querySelector('.week-navigation');
+        navigation.innerHTML = `
+            <button class="btn btn-secondary" onclick="changeWeek(-1)">← Tuần trước</button>
+            <span id="current-week">Tuần hiện tại</span>
+            <button class="btn btn-secondary" onclick="changeWeek(1)">Tuần sau →</button>
+        `;
+        updateCurrentWeek();
+    }
+
+    function updateMonthNavigation() {
+        const navigation = document.querySelector('.week-navigation');
+        navigation.innerHTML = `
+            <button class="btn btn-secondary" onclick="changeMonth(-1)">← Tháng trước</button>
+            <span id="current-month">Tháng hiện tại</span>
+            <button class="btn btn-secondary" onclick="changeMonth(1)">Tháng sau →</button>
+        `;
+        updateCurrentMonth();
+    }
+
+    function changeMonth(offset) {
+        currentMonthOffset += offset;
+        updateCurrentMonth();
+        generateCalendarView();
+        showNotification(`Đã chuyển ${offset > 0 ? 'sang tháng sau' : 'về tháng trước'}`, 'info');
+    }
+
+    // 7. Thêm hàm updateCurrentMonth
+    function updateCurrentMonth() {
+        const currentDate = new Date();
+        currentDate.setMonth(currentDate.getMonth() + currentMonthOffset);
+        
+        const monthNames = [
+            'Tháng 01', 'Tháng 02', 'Tháng 03', 'Tháng 04', 'Tháng 05', 'Tháng 06',
+            'Tháng 07', 'Tháng 08', 'Tháng 09', 'Tháng 10', 'Tháng 11', 'Tháng 12'
+        ];
+        
+        const monthElement = document.getElementById('current-month');
+        if (monthElement) {
+            monthElement.textContent = `${monthNames[currentDate.getMonth()]}/${currentDate.getFullYear()}`;
+        }
+    }
+
+    function generateCalendarView() {
+        const calendarGrid = document.getElementById('calendar-grid');
+        calendarGrid.innerHTML = '';
+        
+        // Generate calendar cho tháng hiện tại + offset
+        const now = new Date();
+        now.setMonth(now.getMonth() + currentMonthOffset);
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        
+        // Calendar header
+        const daysOfWeek = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+        daysOfWeek.forEach(day => {
+            const headerDiv = document.createElement('div');
+            headerDiv.style.fontWeight = 'bold';
+            headerDiv.style.textAlign = 'center';
+            headerDiv.style.padding = '10px';
+            headerDiv.style.background = '#f1f5f9';
+            headerDiv.textContent = day;
+            calendarGrid.appendChild(headerDiv);
+        });
+        
+        // Get first day of month và number of days
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const startDate = new Date(firstDay);
+        startDate.setDate(startDate.getDate() - firstDay.getDay());
+        
+        // Generate calendar days
+        for (let i = 0; i < 42; i++) { // 6 weeks
+            const currentDate = new Date(startDate);
+            currentDate.setDate(startDate.getDate() + i);
             
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'calendar-day';
+            
+            // Highlight hôm nay
+            const today = new Date();
+            if (currentDate.toDateString() === today.toDateString()) {
+                dayDiv.classList.add('today');
+            }
+            
+            // Dim days not in current month
+            if (currentDate.getMonth() !== month) {
+                dayDiv.style.opacity = '0.3';
+            }
+            
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'calendar-day-number';
+            dayNumber.textContent = currentDate.getDate();
+            dayDiv.appendChild(dayNumber);
+            
+            // Add classes for this day - sử dụng logic mới
+            const dayOfWeek = currentDate.getDay() === 0 ? 8 : currentDate.getDay() + 1;
+            const classesForDay = getClassesForSpecificDate(currentDate, dayOfWeek);
+            
+            classesForDay.forEach(cls => {
+                const classSpan = document.createElement('span');
+                classSpan.className = 'calendar-class';
+                classSpan.textContent = cls.code;
+                classSpan.onclick = () => showClassDetail(cls);
+                dayDiv.appendChild(classSpan);
+            });
+            
+            calendarGrid.appendChild(dayDiv);
+        }
+    }
+
+    function getClassesForSpecificDate(specificDate, dayOfWeek) {
+        return scheduleData.filter(classInfo => {
+            if (classInfo.day !== dayOfWeek) return false;
+            
+            // Parse ngày bắt đầu và kết thúc
             const dateRange = classInfo.dates.split('-');
             const startDate = parseVietnameseDate(dateRange[0]);
             const endDate = parseVietnameseDate(dateRange[1]);
             
-            // Kiểm tra xem tuần hiện tại có nằm trong khoảng thời gian học không
-            const weekStart = new Date(currentDate);
-            weekStart.setDate(currentDate.getDate() - currentDate.getDay() + 1);
+            // Lấy tất cả ngày học của môn này
+            const classDates = getClassDatesInRange(classInfo, startDate, endDate);
             
-            const weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekStart.getDate() + 6);
-            
-            return (weekStart <= endDate && weekEnd >= startDate);
-        }
-        function parseVietnameseDate(dateStr) {
-            const parts = dateStr.trim().split('/');
-            const day = parseInt(parts[0]);
-            const month = parseInt(parts[1]) - 1; // Month is 0-indexed
-            const year = parseInt('20' + parts[2]); // Assuming 25 means 2025
-            return new Date(year, month, day);
-        }
-        function showClassDetail(classInfo) {
-            const modal = document.getElementById('class-modal');
-            const title = document.getElementById('modal-title');
-            const body = document.getElementById('modal-body');
-            
-            title.textContent = `${classInfo.code} - ${classInfo.name}`;
-            body.innerHTML = `
-                <p><strong>👨‍🏫 Giảng viên:</strong> ${classInfo.teacher}</p>
-                <p><strong>📅 Thời gian:</strong> ${getDayName(classInfo.day)}, Tiết ${classInfo.period}-${classInfo.period + classInfo.duration - 1}</p>
-                <p><strong>🏫 Phòng học:</strong> ${classInfo.room}</p>
-                <p><strong>👥 Lớp:</strong> ${classInfo.class}</p>
-                <p><strong>📆 Thời gian học:</strong> ${classInfo.dates}</p>
-                <p><strong>⏱️ Số tiết:</strong> ${classInfo.duration} tiết</p>
-            `;
-            
-            modal.style.display = 'block';
-        }
-
-        function getDayName(day) {
-            const days = ['', '', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
-            return days[day];
-        }
-
-        function showToday() {
-            const today = new Date().getDay();
-            const todayColumn = today === 0 ? 7 : today; // Chủ nhật = 0 -> 7
-            
-            // Xóa highlight cũ
-            document.querySelectorAll('.today-highlight').forEach(el => {
-                el.classList.remove('today-highlight');
+            // Kiểm tra xem ngày cụ thể có trong danh sách ngày học không
+            return classDates.some(classDate => {
+                return classDate.toDateString() === specificDate.toDateString();
             });
-            
-            // Highlight cột hôm nay
-            const table = document.getElementById('schedule-table');
-            const rows = table.rows;
-            for (let i = 0; i < rows.length; i++) {
-                if (rows[i].cells[todayColumn]) {
-                    rows[i].cells[todayColumn].classList.add('today-highlight');
-                }
-            }
-            
-            showNotification(`Đã highlight lịch học hôm nay (${getDayName(todayColumn + 1)})`, 'info');
-        }
+        });
+    }
 
-        function highlightToday() {
-            setTimeout(showToday, 500);
-        }
+    function showNotification(message, type = 'info') {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
 
-        function searchClasses(searchTerm) {
-            const cells = document.querySelectorAll('.class-cell');
-            
-            cells.forEach(cell => {
-                const text = cell.textContent.toLowerCase();
-                if (text.includes(searchTerm.toLowerCase())) {
-                    cell.style.opacity = '1';
-                    cell.style.transform = 'scale(1)';
-                } else {
-                    cell.style.opacity = searchTerm ? '0.3' : '1';
-                    cell.style.transform = searchTerm ? 'scale(0.95)' : 'scale(1)';
-                }
-            });
+    // Modal functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('class-modal');
+        const closeBtn = document.querySelector('.close');
+        
+        closeBtn.onclick = function() {
+            modal.style.display = 'none';
         }
-
-        function changeWeek(offset) {
-            currentWeekOffset += offset;
-            updateCurrentWeek();
-            showNotification(`Đã chuyển ${offset > 0 ? 'sang tuần sau' : 'về tuần trước'}`, 'info');
-        }
-
-        function updateCurrentWeek() {
-            const currentDate = new Date();
-            currentDate.setDate(currentDate.getDate() + (currentWeekOffset * 7));
-            
-            const weekStart = new Date(currentDate);
-            weekStart.setDate(currentDate.getDate() - currentDate.getDay() + 1);
-            
-            const weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekStart.getDate() + 6);
-            
-            document.getElementById('current-week').textContent = 
-                `${weekStart.getDate()}/${weekStart.getMonth() + 1} - ${weekEnd.getDate()}/${weekEnd.getMonth() + 1}`;
-        }
-
-        function showStats() {
-            const container = document.getElementById('stats-container');
-            container.style.display = container.style.display === 'none' ? 'grid' : 'none';
-            
-            if (container.style.display === 'grid') {
-                updateStats();
-                showNotification('Đã hiển thị thống kê chi tiết', 'success');
-            }
-        }
-
-        function updateStats() {
-            const uniqueClasses = [...new Set(scheduleData.map(c => c.code))];
-            const totalHours = scheduleData.reduce((sum, c) => sum + c.duration, 0) * 0.75; // 45 phút/tiết
-            
-            // Tìm ngày bận nhất
-            const dayCount = {};
-            scheduleData.forEach(c => {
-                dayCount[c.day] = (dayCount[c.day] || 0) + c.duration;
-            });
-            const busiestDay = Object.keys(dayCount).reduce((a, b) => dayCount[a] > dayCount[b] ? a : b);
-            
-            document.getElementById('total-classes').textContent = uniqueClasses.length;
-            document.getElementById('total-hours').textContent = Math.round(totalHours);
-            document.getElementById('busiest-day').textContent = getDayName(parseInt(busiestDay));
-            document.getElementById('next-class').textContent = getNextClass();
-        }
-
-        function getNextClass() {
-            const now = new Date();
-            const currentDay = now.getDay() === 0 ? 8 : now.getDay() + 1; // Convert to our format
-            const currentHour = now.getHours();
-            
-            // Tìm lớp tiếp theo trong ngày
-            const todayClasses = scheduleData.filter(c => c.day === currentDay);
-            for (let cls of todayClasses) {
-                const classHour = getClassStartHour(cls.period);
-                if (classHour > currentHour) {
-                    return cls.code;
-                }
-            }
-            
-            // Nếu không có lớp nào trong ngày, tìm lớp đầu tiên của ngày mai
-            const tomorrow = currentDay === 8 ? 2 : currentDay + 1;
-            const tomorrowClasses = scheduleData.filter(c => c.day === tomorrow);
-            if (tomorrowClasses.length > 0) {
-                return tomorrowClasses[0].code;
-            }
-            
-            return 'Không có';
-        }
-
-        function getClassStartHour(period) {
-            const timeMap = {1: 6, 4: 9, 7: 12, 10: 15, 13: 18};
-            return timeMap[period] || 6;
-        }
-
-        function exportSchedule() {
-            let csvContent = "Mã môn,Tên môn,Giảng viên,Ngày,Tiết,Phòng,Lớp\n";
-            
-            scheduleData.forEach(cls => {
-                csvContent += `${cls.code},"${cls.name}","${cls.teacher}",${getDayName(cls.day)},${cls.period},${cls.room},${cls.class}\n`;
-            });
-            
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'thoi_khoa_bieu.csv';
-            link.click();
-            
-            showNotification('Đã xuất thời khóa biểu thành công!', 'success');
-        }
-
-        function showNotifications() {
-            const notifications = [
-                'Nhắc nhở: Lớp GCOS134 sẽ bắt đầu lúc 18:00 hôm nay',
-                'Thông báo: Phòng học môn GCOS108 đã thay đổi',
-                'Lịch học tuần tới sẽ có một số điều chỉnh'
-            ];
-            
-            notifications.forEach((msg, index) => {
-                setTimeout(() => showNotification(msg, 'info'), index * 1000);
-            });
-        }
-
-        function switchView(view) {
-            currentView = view;
-            
-            // Update button states
-            document.querySelectorAll('.view-toggle button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            // Switch views
-            if (view === 'table') {
-                document.getElementById('table-view').style.display = 'block';
-                document.getElementById('calendar-view').style.display = 'none';
-            } else {
-                document.getElementById('table-view').style.display = 'none';
-                document.getElementById('calendar-view').style.display = 'block';
-                generateCalendarView();
-            }
-        }
-
-        function generateCalendarView() {
-            const calendarGrid = document.getElementById('calendar-grid');
-            calendarGrid.innerHTML = '';
-            
-            // Generate calendar for current month
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth();
-            
-            // Calendar header
-            const daysOfWeek = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-            daysOfWeek.forEach(day => {
-                const headerDiv = document.createElement('div');
-                headerDiv.style.fontWeight = 'bold';
-                headerDiv.style.textAlign = 'center';
-                headerDiv.style.padding = '10px';
-                headerDiv.style.background = '#f1f5f9';
-                headerDiv.textContent = day;
-                calendarGrid.appendChild(headerDiv);
-            });
-            
-            // Get first day of month and number of days
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const startDate = new Date(firstDay);
-            startDate.setDate(startDate.getDate() - firstDay.getDay());
-            
-            // Generate calendar days
-            for (let i = 0; i < 42; i++) { // 6 weeks
-                const currentDate = new Date(startDate);
-                currentDate.setDate(startDate.getDate() + i);
-                
-                const dayDiv = document.createElement('div');
-                dayDiv.className = 'calendar-day';
-                
-                if (currentDate.toDateString() === new Date().toDateString()) {
-                    dayDiv.classList.add('today');
-                }
-                
-                const dayNumber = document.createElement('div');
-                dayNumber.className = 'calendar-day-number';
-                dayNumber.textContent = currentDate.getDate();
-                dayDiv.appendChild(dayNumber);
-                
-                // Add classes for this day
-                const dayOfWeek = currentDate.getDay() === 0 ? 8 : currentDate.getDay() + 1;
-                const classesForDay = scheduleData.filter(cls => cls.day === dayOfWeek);
-                
-                classesForDay.forEach(cls => {
-                    const classSpan = document.createElement('span');
-                    classSpan.className = 'calendar-class';
-                    classSpan.textContent = cls.code;
-                    classSpan.onclick = () => showClassDetail(cls);
-                    dayDiv.appendChild(classSpan);
-                });
-                
-                calendarGrid.appendChild(dayDiv);
-            }
-        }
-
-        function showNotification(message, type = 'info') {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            notification.classList.add('show');
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
-        }
-
-        // Modal functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const modal = document.getElementById('class-modal');
-            const closeBtn = document.querySelector('.close');
-            
-            closeBtn.onclick = function() {
+        
+        window.onclick = function(event) {
+            if (event.target === modal) {
                 modal.style.display = 'none';
             }
-            
-            window.onclick = function(event) {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
+        }
+        
+        // Initialize schedule
+        initSchedule();
+        
+        // Auto-refresh every minute to update "next class"
+        setInterval(() => {
+            if (document.getElementById('stats-container').style.display === 'grid') {
+                updateStats();
+            }
+        }, 60000);
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey) {
+                switch(e.key) {
+                    case 't':
+                        e.preventDefault();
+                        showToday();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        showStats();
+                        break;
+                    case 'e':
+                        e.preventDefault();
+                        exportSchedule();
+                        break;
+                    case 'f':
+                        e.preventDefault();
+                        document.querySelector('.search-box').focus();
+                        break;
                 }
             }
-            
-            // Initialize schedule
-            initSchedule();
-            
-            // Auto-refresh every minute to update "next class"
-            setInterval(() => {
-                if (document.getElementById('stats-container').style.display === 'grid') {
-                    updateStats();
-                }
-            }, 60000);
-            
-            // Add keyboard shortcuts
-            document.addEventListener('keydown', function(e) {
-                if (e.ctrlKey) {
-                    switch(e.key) {
-                        case 't':
-                            e.preventDefault();
-                            showToday();
-                            break;
-                        case 's':
-                            e.preventDefault();
-                            showStats();
-                            break;
-                        case 'e':
-                            e.preventDefault();
-                            exportSchedule();
-                            break;
-                        case 'f':
-                            e.preventDefault();
-                            document.querySelector('.search-box').focus();
-                            break;
-                    }
-                }
-            });
-            
-            // Add touch gestures for mobile
-            let touchStartX = 0;
-            let touchEndX = 0;
-            
-            document.addEventListener('touchstart', e => {
-                touchStartX = e.changedTouches[0].screenX;
-            });
-            
-            document.addEventListener('touchend', e => {
-                touchEndX = e.changedTouches[0].screenX;
-                handleSwipe();
-            });
-            
-            function handleSwipe() {
-                const swipeThreshold = 50;
-                const diff = touchStartX - touchEndX;
-                
-                if (Math.abs(diff) > swipeThreshold) {
-                    if (diff > 0) {
-                        // Swipe left - next week
-                        changeWeek(1);
-                    } else {
-                        // Swipe right - previous week
-                        changeWeek(-1);
-                    }
-                }
-            }
-            
-            // Add automatic notifications for upcoming classes
-            function checkUpcomingClasses() {
-                const now = new Date();
-                const currentDay = now.getDay() === 0 ? 8 : now.getDay() + 1;
-                const currentHour = now.getHours();
-                const currentMinute = now.getMinutes();
-                
-                scheduleData.forEach(cls => {
-                    if (cls.day === currentDay) {
-                        const classStartHour = getClassStartHour(cls.period);
-                        const timeDiff = (classStartHour * 60) - (currentHour * 60 + currentMinute);
-                        
-                        // Notify 30 minutes before class
-                        if (timeDiff === 30) {
-                            showNotification(`⏰ Lớp ${cls.code} sẽ bắt đầu trong 30 phút tại phòng ${cls.room}`, 'warning');
-                        }
-                        
-                        // Notify 5 minutes before class
-                        if (timeDiff === 5) {
-                            showNotification(`🚨 Lớp ${cls.code} sắp bắt đầu! Hãy chuẩn bị đến phòng ${cls.room}`, 'error');
-                        }
-                    }
-                });
-            }
-            
-            // Check for upcoming classes every minute
-            setInterval(checkUpcomingClasses, 60000);
-            
-            // Add weather widget (simulated)
-            function addWeatherWidget() {
-                const weatherDiv = document.createElement('div');
-                weatherDiv.style.position = 'fixed';
-                weatherDiv.style.top = '20px';
-                weatherDiv.style.left = '20px';
-                weatherDiv.style.background = 'rgba(255, 255, 255, 0.9)';
-                weatherDiv.style.padding = '10px';
-                weatherDiv.style.borderRadius = '8px';
-                weatherDiv.style.fontSize = '0.9em';
-                weatherDiv.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
-                weatherDiv.innerHTML = '🌤️ 28°C - Nắng nhẹ<br>📍 TP.HCM';
-                document.body.appendChild(weatherDiv);
-                
-                setTimeout(() => {
-                    weatherDiv.style.display = 'none';
-                }, 5000);
-            }
-            
-            // Show weather after 2 seconds
-            setTimeout(addWeatherWidget, 2000);
-            
-            // Add productivity tips
-            const tips = [
-                '💡 Mẹo: Sử dụng Ctrl+T để xem lịch học hôm nay',
-                '📚 Nhắc nhở: Chuẩn bị tài liệu trước 15 phút',
-                '⏰ Gợi ý: Đặt báo thức trước giờ học 30 phút',
-                '🎯 Lời khuyên: Xem lại bài cũ trước khi đến lớp',
-                '🔔 Thông tin: Kiểm tra email trước mỗi buổi học'
-            ];
-            
-            function showRandomTip() {
-                const randomTip = tips[Math.floor(Math.random() * tips.length)];
-                showNotification(randomTip, 'info');
-            }
-            
-            // Show random tip every 5 minutes
-            setInterval(showRandomTip, 300000);
         });
-
-        // Add study timer functionality
-        let studyTimer = null;
-        let studyTime = 0;
         
-        function startStudyTimer() {
-            if (studyTimer) return;
-            
-            studyTimer = setInterval(() => {
-                studyTime++;
-                const hours = Math.floor(studyTime / 3600);
-                const minutes = Math.floor((studyTime % 3600) / 60);
-                const seconds = studyTime % 60;
-                
-                document.title = `[${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}] Thời Khóa Biểu`;
-            }, 1000);
-            
-            showNotification('⏱️ Đã bắt đầu tính thời gian học', 'success');
-        }
+        // Add touch gestures for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
         
-        function stopStudyTimer() {
-            if (studyTimer) {
-                clearInterval(studyTimer);
-                studyTimer = null;
-                document.title = 'Thời Khóa Biểu Thông Minh';
-                
-                const hours = Math.floor(studyTime / 3600);
-                const minutes = Math.floor((studyTime % 3600) / 60);
-                showNotification(`✅ Đã học ${hours}h ${minutes}m hôm nay!`, 'success');
-                studyTime = 0;
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    // Swipe left - next week
+                    changeWeek(1);
+                } else {
+                    // Swipe right - previous week
+                    changeWeek(-1);
+                }
             }
         }
         
-        // Add study timer controls
-        setTimeout(() => {
-            const timerControls = document.createElement('div');
-            timerControls.innerHTML = `
-                <button class="btn btn-success" onclick="startStudyTimer()" style="margin-right: 10px;">▶️ Bắt đầu học</button>
-                <button class="btn btn-warning" onclick="stopStudyTimer()">⏹️ Dừng học</button>
-            `;
-            timerControls.style.marginTop = '10px';
-            document.querySelector('.controls').appendChild(timerControls);
+        // Add automatic notifications for upcoming classes
+        function checkUpcomingClasses() {
+            const now = new Date();
+            const currentDay = now.getDay() === 0 ? 8 : now.getDay() + 1;
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            
+            scheduleData.forEach(cls => {
+                if (cls.day === currentDay) {
+                    const classStartHour = getClassStartHour(cls.period);
+                    const timeDiff = (classStartHour * 60) - (currentHour * 60 + currentMinute);
+                    
+                    // Notify 30 minutes before class
+                    if (timeDiff === 30) {
+                        showNotification(`⏰ Lớp ${cls.code} sẽ bắt đầu trong 30 phút tại phòng ${cls.room}`, 'warning');
+                    }
+                    
+                    // Notify 5 minutes before class
+                    if (timeDiff === 5) {
+                        showNotification(`🚨 Lớp ${cls.code} sắp bắt đầu! Hãy chuẩn bị đến phòng ${cls.room}`, 'error');
+                    }
+                }
+            });
+        }
+        
+        // Check for upcoming classes every minute
+        setInterval(checkUpcomingClasses, 60000);
+        
+        // Add weather widget (simulated)
+        function addWeatherWidget() {
+            const weatherDiv = document.createElement('div');
+            weatherDiv.style.position = 'fixed';
+            weatherDiv.style.top = '20px';
+            weatherDiv.style.left = '20px';
+            weatherDiv.style.background = 'rgba(255, 255, 255, 0.9)';
+            weatherDiv.style.padding = '10px';
+            weatherDiv.style.borderRadius = '8px';
+            weatherDiv.style.fontSize = '0.9em';
+            weatherDiv.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+            weatherDiv.innerHTML = '🌤️ 28°C - Nắng nhẹ<br>📍 TP.HCM';
+            document.body.appendChild(weatherDiv);
+            
+            setTimeout(() => {
+                weatherDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Show weather after 2 seconds
+        setTimeout(addWeatherWidget, 2000);
+        
+        // Add productivity tips
+        const tips = [
+            '💡 Mẹo: Sử dụng Ctrl+T để xem lịch học hôm nay',
+            '📚 Nhắc nhở: Chuẩn bị tài liệu trước 15 phút',
+            '⏰ Gợi ý: Đặt báo thức trước giờ học 30 phút',
+            '🎯 Lời khuyên: Xem lại bài cũ trước khi đến lớp',
+            '🔔 Thông tin: Kiểm tra email trước mỗi buổi học'
+        ];
+        
+        function showRandomTip() {
+            const randomTip = tips[Math.floor(Math.random() * tips.length)];
+            showNotification(randomTip, 'info');
+        }
+        
+        // Show random tip every 5 minutes
+        setInterval(showRandomTip, 300000);
+    });
+
+    // Add study timer functionality
+    let studyTimer = null;
+    let studyTime = 0;
+    
+    function startStudyTimer() {
+        if (studyTimer) return;
+        
+        studyTimer = setInterval(() => {
+            studyTime++;
+            const hours = Math.floor(studyTime / 3600);
+            const minutes = Math.floor((studyTime % 3600) / 60);
+            const seconds = studyTime % 60;
+            
+            document.title = `[${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}] Thời Khóa Biểu`;
         }, 1000);
-    </script>
+        
+        showNotification('⏱️ Đã bắt đầu tính thời gian học', 'success');
+    }
+    
+    function stopStudyTimer() {
+        if (studyTimer) {
+            clearInterval(studyTimer);
+            studyTimer = null;
+            document.title = 'Thời Khóa Biểu Thông Minh';
+            
+            const hours = Math.floor(studyTime / 3600);
+            const minutes = Math.floor((studyTime % 3600) / 60);
+            showNotification(`✅ Đã học ${hours}h ${minutes}m hôm nay!`, 'success');
+            studyTime = 0;
+        }
+    }
+    
+    // Add study timer controls
+    setTimeout(() => {
+        const timerControls = document.createElement('div');
+        timerControls.innerHTML = `
+            <button class="btn btn-success" onclick="startStudyTimer()" style="margin-right: 10px;">▶️ Bắt đầu học</button>
+            <button class="btn btn-warning" onclick="stopStudyTimer()">⏹️ Dừng học</button>
+        `;
+        timerControls.style.marginTop = '10px';
+        document.querySelector('.controls').appendChild(timerControls);
+    }, 1000);
+</script>
